@@ -4,6 +4,8 @@ import idc
 import ida_bytes
 import ida_frame
 import ida_struct
+import httplib
+import re
 
 class FunctionMapper():
 
@@ -26,6 +28,7 @@ class FunctionMapper():
 
     def begin(self):
         print('\n\nStarting nFunctionMapper')
+        self.parseAersFile()
         self.parseFile()
 
         print("\nFunctionMapper Complete")
@@ -39,8 +42,17 @@ class FunctionMapper():
             for e in self.fails:
                 print("  - {}".format(e))
 
-
-
+    def parseAersFile(self):
+        print("Fetching Aers File")
+        conn = httplib.HTTPSConnection("raw.githubusercontent.com")
+        conn.request("GET", "/aers/FFXIVClientStructs/main/ida/ffxiv_idarename.py")
+        response = conn.getresponse()
+        if response.status == 200:
+            string = response.read()
+            exec(string)
+        else:
+            print("Failed to get AERS file")
+        
     def parseFile(self):
         with open(self.filePath, 'r') as functionSigFile:
             buildingLine = ''
